@@ -9,7 +9,7 @@
 Summary:	Free and open-source PlayStation 2 (PS2) emulator
 Name:		pcsx2
 Version:	2.9.144
-Release:	0.1
+Release:	1
 License:	GPL v3
 Group:		Applications
 Source0:	https://github.com/PCSX2/pcsx2/archive/v%{version}/%{name}-%{version}.tar.gz
