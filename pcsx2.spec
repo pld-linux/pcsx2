@@ -93,7 +93,7 @@ export RANLIB="llvm-ranlib"
 	-DENABLE_QT_UI:BOOL=ON \
 	-DPACKAGE_MODE:BOOL=ON \
 	-DBUNDLE_EMOJI_FONT:BOOL=ON \
-	-DENABLE_SETCAP:BOOL=ON \
+	-DENABLE_SETCAP:BOOL=OFF \
 	-DUSE_OPENGL:BOOL=ON \
 	-DUSE_VULKAN:BOOL=ON \
 	-DX11_API:BOOL=ON \
@@ -132,7 +132,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc README.md
 %attr(755,root,root) %{_bindir}/pcsx2-gsrunner
-%attr(755,root,root) %{_bindir}/pcsx2-qt
+%attr(755,root,root) %caps(cap_net_raw,cap_net_admin+eip) %{_bindir}/pcsx2-qt
 %{_desktopdir}/net.pcsx2.PCSX2.desktop
 %{_iconsdir}/hicolor/512x512/apps/PCSX2.png
 %{_datadir}/metainfo/net.pcsx2.PCSX2.appdata.xml
