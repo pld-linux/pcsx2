@@ -1,0 +1,13 @@
+--- pcsx2-2.9.142/cmake/BuildParameters.cmake~	2026-10-23 15:26:42.000000000 +0200
++++ pcsx2-2.9.142/cmake/BuildParameters.cmake	2026-10-24 13:15:56.837136345 +0200
+@@ -54,10 +54,6 @@
+ # Note without the CMAKE_BUILD_TYPE options the value is still defined to ""
+ # Ensure that the value set by the User is correct to avoid some bad behavior later
+ #-------------------------------------------------------------------------------
+-if(NOT CMAKE_BUILD_TYPE MATCHES "Debug|Devel|MinSizeRel|RelWithDebInfo|Release")
+-	set(CMAKE_BUILD_TYPE Devel)
+-	message(STATUS "BuildType set to ${CMAKE_BUILD_TYPE} by default")
+-endif()
+ # Add Devel build type
+ set(CMAKE_C_FLAGS_DEVEL "${CMAKE_C_FLAGS_RELWITHDEBINFO}"
+ 	CACHE STRING "Flags used by the C compiler during development builds" FORCE)
