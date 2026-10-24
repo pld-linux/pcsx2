@@ -3,14 +3,19 @@
 %bcond_without	tests		# build without tests
 %bcond_without	gsrunner	# build the GSRunner
 #
+# Current revision for "latest" tag in https://github.com/PCSX2/pcsx2_patches
+%define		patches_rev		a44ba70
+
 Summary:	Free and open-source PlayStation 2 (PS2) emulator
 Name:		pcsx2
-Version:	2.9.142
+Version:	2.9.144
 Release:	0.1
 License:	GPL v3
 Group:		Applications
 Source0:	https://github.com/PCSX2/pcsx2/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	a1e6bfb47726b7a8d0ae0fc36864b0b0
+# Source0-md5:	15c71a4ef0fe178016fe5f25d699f70c
+Source1:	https://github.com/PCSX2/pcsx2_patches/archive/%{patches_rev}/%{name}_patches-%{patches_rev}.tar.gz
+# Source1-md5:	538832b86af372570f77928af8c8049a
 Patch0:		shaderc.patch
 Patch1:		no-default-build-type.patch
 URL:		https://pcsx2.net/
@@ -36,7 +41,7 @@ BuildRequires:	lld
 BuildRequires:	lz4-devel
 BuildRequires:	pkgconfig
 BuildRequires:	plutosvg-devel >= 0.0.8-2
-BuildRequires:	plutovg-devel >=  1.3.3-3
+BuildRequires:	plutovg-devel >= 1.3.3-3
 BuildRequires:	qt6-linguist >= 6.10
 BuildRequires:	rapidyaml-devel
 BuildRequires:	rpmbuild(macros) >= 1.605
@@ -46,6 +51,7 @@ BuildRequires:	wayland-devel
 BuildRequires:	wayland-egl-devel
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXrandr-devel
+BuildRequires:	zip
 BuildRequires:	zlib-devel >= 1.3
 BuildRequires:	zstd-devel >= 1.5.5
 ExclusiveArch:	%{x8664}
@@ -54,14 +60,14 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define		filterout		-fvar-tracking-assignments -Werror=trampolines
 
 %description
-PCSX2 is a free and open-source PlayStation 2 (PS2) emulator.
-Its purpose is to emulate the PS2's hardware, using a combination of
-MIPS CPU Interpreters, Recompilers and a Virtual Machine which manages
+PCSX2 is a free and open-source PlayStation 2 (PS2) emulator. Its
+purpose is to emulate the PS2's hardware, using a combination of MIPS
+CPU Interpreters, Recompilers and a Virtual Machine which manages
 hardware states and PS2 system memory. This allows you to play PS2
 games on your PC, with many additional features and benefits.
 
 %prep
-%setup -q
+%setup -q -a1
 %patch -P0 -p1
 %patch -P1 -p1
 
@@ -99,8 +105,25 @@ export RANLIB="llvm-ranlib"
 
 %install
 rm -rf $RPM_BUILD_ROOT
+install -d $RPM_BUILD_ROOT/{%{_datadir}/{applications,metainfo},%{_iconsdir}/hicolor/512x512/apps}
 
 %ninja_install -C build
+
+cd pcsx2_patches-%{patches_rev}*/patches
+zip $RPM_BUILD_ROOT%{_datadir}/PCSX2/resources/patches.zip *
+cd ../..
+
+cp -p .github/workflows/scripts/linux/flatpak/screenshots/screenshot*.png $RPM_BUILD_ROOT%{_datadir}/PCSX2/
+cp -p .github/workflows/scripts/linux/pcsx2-qt.desktop $RPM_BUILD_ROOT%{_desktopdir}/net.pcsx2.PCSX2.desktop
+cp -p ./bin/resources/icons/AppIconLarge.png $RPM_BUILD_ROOT%{_iconsdir}/hicolor/512x512/apps/PCSX2.png
+
+_DATE=$(stat --printf '%y' .github)
+%{__sed} -e 's|https://.*/screenshots/|%{_datadir}/PCSX2/|' \
+	-e "s|@GIT_VERSION@|%{version}}|" \
+	-e "s|@GIT_DATE@|${_DATE}|" \
+	-e "s|@GIT_HASH@|v%{version}|" \
+	.github/workflows/scripts/linux/pcsx2-qt.metainfo.xml.in > \
+	$RPM_BUILD_ROOT%{_datadir}/metainfo/net.pcsx2.PCSX2.appdata.xml
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -110,8 +133,12 @@ rm -rf $RPM_BUILD_ROOT
 %doc README.md
 %attr(755,root,root) %{_bindir}/pcsx2-gsrunner
 %attr(755,root,root) %{_bindir}/pcsx2-qt
+%{_desktopdir}/net.pcsx2.PCSX2.desktop
+%{_iconsdir}/hicolor/512x512/apps/PCSX2.png
+%{_datadir}/metainfo/net.pcsx2.PCSX2.appdata.xml
 %dir %{_datadir}/PCSX2
 %{_datadir}/PCSX2/resources
+%{_datadir}/PCSX2/screenshot*.png
 %dir %{_datadir}/PCSX2/translations
 %lang(af) %{_datadir}/PCSX2/translations/pcsx2-qt_af-ZA.qm
 %lang(ar) %{_datadir}/PCSX2/translations/pcsx2-qt_ar-SA.qm
